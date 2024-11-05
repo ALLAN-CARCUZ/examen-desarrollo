@@ -3,6 +3,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 import React, { useState } from 'react';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import Pagos from './Pagos'; // Componente para CheckoutForm
+import Crud from './Crud'; // Importa el componente Crud
 import ProtectedRoute from './ProtectedRoute'; // Importa la ruta protegida
 
 const App = () => {
@@ -132,9 +133,8 @@ const App = () => {
           <button className="btn btn-danger" onClick={handleLogout}>
             Cerrar sesión
           </button>
-          <button className="btn btn-info ml-3" onClick={accessProtectedRoute}>
-            Acceder a ruta protegida
-          </button>
+          {/* Renderizar Crud debajo de los botones de sesión si está autenticado */}
+          <Crud />
         </div>
       )}
     </div>
@@ -153,3 +153,4 @@ const AppRoutes = () => (
 
 export { AppRoutes }; // Exportar AppRoutes para usarse en index.js
 export default App;
+

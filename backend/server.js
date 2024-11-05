@@ -123,6 +123,137 @@ app.post('/create-payment-intent', async (req, res) => {
 });
 
 
+app.get('/api/items', async (req, res) => {
+    const result = await pool.query('SELECT * FROM items');
+    res.json(result.rows);
+});
+
+app.post('/api/items', async (req, res) => {
+    const { name } = req.body;
+    const result = await pool.query('INSERT INTO items (name) VALUES ($1) RETURNING *', [name]);
+    res.json(result.rows[0]);
+});
+
+app.put('/api/items/:id', async (req, res) => {
+    const { id } = req.params;
+    const { name } = req.body;
+    const result = await pool.query('UPDATE items SET name = $1 WHERE id = $2 RETURNING *', [name, id]);
+    res.json(result.rows[0]);
+});
+
+app.delete('/api/items/:id', async (req, res) => {
+    const { id } = req.params;
+    await pool.query('DELETE FROM items WHERE id = $1', [id]);
+    res.sendStatus(204);
+});
+
+
+
+// Obtener todos los proyectos
+app.get('/api/proyectos', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM proyectos');
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Error al obtener proyectos:', error);
+        res.status(500).json({ error: 'Error al obtener proyectos' });
+    }
+});
+
+// Crear un nuevo proyecto
+app.post('/api/proyectos', async (req, res) => {
+    const {
+        titulo,
+        descripcion,
+        completada = false,
+        fecha_vencimiento,
+        prioridad = 'media',
+        asignado_a,
+        categoria,
+        costo_proyecto = 0.0,
+        pagado = false
+    } = req.body;
+
+    try {
+        const result = await pool.query(
+            `INSERT INTO proyectos (titulo, descripcion, completada, fecha_vencimiento, prioridad, asignado_a, categoria, costo_proyecto, pagado) 
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+            [titulo, descripcion, completada, fecha_vencimiento, prioridad, asignado_a, categoria, costo_proyecto, pagado]
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (error) {
+        console.error('Error al crear proyecto:', error);
+        res.status(500).json({ error: 'Error al crear proyecto' });
+    }
+});
+
+// Actualizar un proyecto
+app.put('/api/proyectos/:id', async (req, res) => {
+    const { id } = req.params;
+    const {
+        titulo,
+        descripcion,
+        completada,
+        fecha_vencimiento,
+        prioridad,
+        asignado_a,
+        categoria,
+        costo_proyecto,
+        pagado
+    } = req.body;
+
+    try {
+        const result = await pool.query(
+            `UPDATE proyectos SET 
+                titulo = $1, 
+                descripcion = $2, 
+                completada = $3, 
+                fecha_vencimiento = $4, 
+                prioridad = $5, 
+                asignado_a = $6, 
+                categoria = $7, 
+                costo_proyecto = $8, 
+                pagado = $9
+             WHERE id = $10 RETURNING *`,
+            [titulo, descripcion, completada, fecha_vencimiento, prioridad, asignado_a, categoria, costo_proyecto, pagado, id]
+        );
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error('Error al actualizar proyecto:', error);
+        res.status(500).json({ error: 'Error al actualizar proyecto' });
+    }
+});
+
+// Eliminar un proyecto
+app.delete('/api/proyectos/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await pool.query('DELETE FROM proyectos WHERE id = $1', [id]);
+        res.sendStatus(204);
+    } catch (error) {
+        console.error('Error al eliminar proyecto:', error);
+        res.status(500).json({ error: 'Error al eliminar proyecto' });
+    }
+});
+
+
+// Ruta para obtener los detalles de un proyecto por ID
+app.get('/api/proyectos/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+      const result = await pool.query('SELECT * FROM proyectos WHERE id = $1', [id]);
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'Proyecto no encontrado' });
+      }
+      res.json(result.rows[0]);
+    } catch (error) {
+      res.status(500).json({ error: 'Error al obtener el proyecto' });
+    }
+  });
+  
+
+
+
 
 /*CREATE TABLE items (
     id SERIAL PRIMARY KEY,
