@@ -88,7 +88,7 @@ const App = () => {
 
   return (
     <div className="container mt-5">
-      <h1 className="text-center">Login con React y Node.js</h1>
+      <h1 className="text-center">Examen Final Allan Carcúz</h1>
 
       {!token ? (
         <>
